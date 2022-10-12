@@ -110,7 +110,7 @@ ENV/
 env.bak/
 venv.bak/
 
-static/
+yacut/static/
 
 # Spyder project settings
 .spyderproject
