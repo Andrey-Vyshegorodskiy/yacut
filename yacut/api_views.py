@@ -1,83 +1,40 @@
-from flask import Flask, render_template, flash, url_for, redirect
-from flask_wtf import FlaskForm
-from wtforms import URLField, SubmitField, StringField
-from wtforms.validators import DataRequired, Length, Optional, URL, Regexp, ValidationError
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from random import choices
+from re import match
+import validators
+
+from flask import jsonify, request
+
+from . import app, db
+from .error_handlers import InvalidAPIUsage
+from .models import URL_map
+from .views import get_unique_short_id
 
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'MY SECRET KEY'
-db = SQLAlchemy(app)
+@app.route('/api/id/<string:short_id>/', methods=['GET'])
+def get_url(short_id):
+    url = URL_map.query.filter_by(short=short_id).first()
+    if not url:
+        raise InvalidAPIUsage('Указанный id не найден', 404)
+    return jsonify({'url': url.original})
 
 
-class URL_map(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    original = db.Column(db.String(256), nullable=False)
-    short = db.Column(db.String(16), nullable=False)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
-    def to_dict(self):
-        return dict(
-            url=self.original,
-            short_link=url_for('short_view', short=self.short, _external=True))
-
-    def from_dict(self, data):
-        setattr(self, 'original', data['url'])
-        setattr(self, 'short', data['custom_id'])
-
-
-class URL_mapForm(FlaskForm):
-    original_link = URLField(
-        'Длинная ссылка',
-        validators=[
-            DataRequired(message='Обязательное поле'),
-            Length(1, 256),
-            URL(require_tld=True, message=('Ошибка в написании URL')), ]
-    )
-    custom_id = StringField(
-        'Ваш вариант короткой ссылки',
-        validators=[
-            Length(1, 16),
-            Optional(),
-            Regexp(r'^[A-Za-z0-9]+$',
-                   message='Только латинские буквы (маленькие, большие) и цифры')]
-    )
-    submit = SubmitField('Создать')
-
-    def validate_custom_id(self, field):
-        if field.data and URL_map.query.filter_by(short=field.data).first():
-            raise ValidationError(f'{field.data} уже используется!')
-
-
-@app.route('/', methods=['GET', 'POST'])
-def index_view():
-    form = URL_mapForm()
-    if form.validate_on_submit():
-        original = form.original_link.data
-        short = form.custom_id.data or get_unique_short_id()
-        url = URL_map(original=original, short=short)
-        db.session.add(url)
-        db.session.commit()
-        flash(url_for('short_view', short=short, _external=True))
-    return render_template('url_map.html', form=form)
-
-
-@app.route('/<string:short>')
-def short_view(short):
-    return redirect(
-        URL_map.query.filter_by(short=short).first_or_404().original)
-
-
-def get_unique_short_id():
-    while True:
-        short_id = ''.join(choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=6))
-        if not URL_map.query.filter_by(short=short_id).first():
-            return short_id
-
-
-if __name__ == '__main__':
-    app.run()
+@app.route('/api/id/', methods=['POST'])
+def create_id():
+    data = request.get_json(silent=True)
+    if not data:
+        raise InvalidAPIUsage('Отсутствует тело запроса')
+    if 'url' not in data:
+        raise InvalidAPIUsage('"url" является обязательным полем!')
+    if not validators.url(data['url']):
+        raise InvalidAPIUsage('Указан недопустимый URL')
+    if not data.get('custom_id'):
+        data['custom_id'] = get_unique_short_id()
+    if not match(r'^[A-Za-z0-9]{1,16}$', data['custom_id']):
+        raise InvalidAPIUsage(
+            'Указано недопустимое имя для короткой ссылки')
+    if URL_map.query.filter_by(short=data['custom_id']).first():
+        raise InvalidAPIUsage(f'Имя "{data["custom_id"]}" уже занято.')
+    url = URL_map()
+    url.from_dict(data)
+    db.session.add(url)
+    db.session.commit()
+    return jsonify(url.to_dict()), 201

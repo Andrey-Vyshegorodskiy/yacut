@@ -1,14 +1,15 @@
 from flask import flash, redirect, render_template, url_for
 from random import choices
 
-from .. import app, db
+from . import app, db
 from .forms import URL_mapForm
 from .models import URL_map
 
 
 def get_unique_short_id():
+    kit = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     while True:
-        short_id = ''.join(choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=6))
+        short_id = ''.join(choices(kit, k=6))
         if not URL_map.query.filter_by(short=short_id).first():
             return short_id
 
