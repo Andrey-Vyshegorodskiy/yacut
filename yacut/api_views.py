@@ -4,6 +4,7 @@ import validators
 from flask import jsonify, request
 
 from . import app, db
+
 from .error_handlers import InvalidAPIUsage
 from .models import URL_map
 from .views import get_unique_short_id
