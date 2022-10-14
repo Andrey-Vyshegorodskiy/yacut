@@ -45,12 +45,12 @@
         <div class="col-sm"></div>
         <div class="col-sm">
           <p class="text-center">
-            {% for msg in get_flashed_messages() %}
+            {% if url_map %}
               <h5 class="text-center">
                 Ваша новая ссылка готова: </br>
-                <a href="{{ msg }}">{{ msg }}</a>
+                <a href="{{ url_map }}">{{ url_map }}</a>
               </h5>
-            {% endfor %}
+            {% endif %}
           </p>
         </div>
         <div class="col-sm"></div>

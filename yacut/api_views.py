@@ -1,20 +1,22 @@
-from re import match
-import validators
-
 from flask import jsonify, request
 
-from . import app, db
-
+from . import app
 from .error_handlers import InvalidAPIUsage
 from .models import URL_map
-from .views import get_unique_short_id
+
+ID_NOT_FOUND = 'Указанный id не найден'
+MISSING_REQUEST = 'Отсутствует тело запроса'
+URL_REQUIRED_FIELD = '"url" является обязательным полем!'
+URL_ERROR = 'Указан недопустимый URL'
+ERROR_SHORT_LINK = 'Указано недопустимое имя для короткой ссылки'
+NAME_NOT_FREE = 'Имя "{}" уже занято.'
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
 def get_url(short_id):
-    url = URL_map.query.filter_by(short=short_id).first()
+    url = URL_map.get_url_map(short_id)
     if not url:
-        raise InvalidAPIUsage('Указанный id не найден', 404)
+        raise InvalidAPIUsage(ID_NOT_FOUND, 404)
     return jsonify({'url': url.original})
 
 
@@ -22,20 +24,11 @@ def get_url(short_id):
 def create_id():
     data = request.get_json(silent=True)
     if not data:
-        raise InvalidAPIUsage('Отсутствует тело запроса')
+        raise InvalidAPIUsage(MISSING_REQUEST)
     if 'url' not in data:
-        raise InvalidAPIUsage('"url" является обязательным полем!')
-    if not validators.url(data['url']):
-        raise InvalidAPIUsage('Указан недопустимый URL')
-    if not data.get('custom_id'):
-        data['custom_id'] = get_unique_short_id()
-    if not match(r'^[A-Za-z0-9]{1,16}$', data['custom_id']):
-        raise InvalidAPIUsage(
-            'Указано недопустимое имя для короткой ссылки')
-    if URL_map.query.filter_by(short=data['custom_id']).first():
-        raise InvalidAPIUsage(f'Имя "{data["custom_id"]}" уже занято.')
-    url = URL_map()
-    url.from_dict(data)
-    db.session.add(url)
-    db.session.commit()
+        raise InvalidAPIUsage(URL_REQUIRED_FIELD)
+    try:
+        url = URL_map.create(data['url'], data.get('custom_id'), validate=True)
+    except ValueError as error:
+        raise InvalidAPIUsage(str(error))
     return jsonify(url.to_dict()), 201
