@@ -39,7 +39,7 @@ python3 -m venv venv
     source venv/bin/activate
     ```
 
-* Если у вас windows
+* Если у вас Windows
 
     ```commandline
     source venv/scripts/activate
@@ -55,6 +55,14 @@ python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+Выполнить миграции:
+
+```commandline
+flask db migrate
+flask db upgrade
+```
+
+
 Запуск проекта:
 ```commandline
 flask run
@@ -62,3 +70,4 @@ flask run
 
 ## Автор
 Андрей Вышегородский
+https://t.me/Vyshegorodskiy

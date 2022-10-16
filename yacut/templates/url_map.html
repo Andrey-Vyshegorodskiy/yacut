@@ -45,6 +45,13 @@
         <div class="col-sm"></div>
         <div class="col-sm">
           <p class="text-center">
+            {% if messages %}
+              {% for message in messages %}
+                <span style="color: red">{{ message }}</span>
+              {% endfor %}
+            {% endif %}
+          </p>
+          <p class="text-center">
             {% if url_map %}
               <h5 class="text-center">
                 Ваша новая ссылка готова: </br>
