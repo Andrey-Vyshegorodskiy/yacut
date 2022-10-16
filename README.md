@@ -58,7 +58,6 @@ pip install -r requirements.txt
 Выполнить миграции:
 
 ```commandline
-flask db migrate
 flask db upgrade
 ```
 
@@ -70,4 +69,4 @@ flask run
 
 ## Автор
 Андрей Вышегородский
-https://t.me/Vyshegorodskiy
+https://github.com/Andrey-Vyshegorodskiy
