@@ -1,8 +1,8 @@
-from flask import redirect, render_template, url_for, flash
+from flask import flash, redirect, render_template, url_for
 
 from . import app
 from .forms import URL_mapForm
-from .models import URL_map, ShortIdGenerationError
+from .models import ShortIdGenerationError, URL_map
 
 NAME_NOT_FREE = 'Имя "{}" уже занято!'
 

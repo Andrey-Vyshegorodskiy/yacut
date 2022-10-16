@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import URLField, SubmitField, StringField
-from wtforms.validators import (DataRequired, Length, Optional, URL, Regexp,
+from wtforms import StringField, SubmitField, URLField
+from wtforms.validators import (URL, DataRequired, Length, Optional, Regexp,
                                 ValidationError)
 
-from .models import URL_map
-from settings import ORIGINAL_LEN, SHORT_LEN, PATTERN
+from settings import ORIGINAL_LEN, PATTERN, SHORT_LEN
 
+from .models import URL_map
 
 LONG_LINK = 'Длинная ссылка'
 REQUIRED_FIELD = 'Обязательное поле.'

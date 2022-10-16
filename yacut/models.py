@@ -1,17 +1,14 @@
 from datetime import datetime
-from re import fullmatch
-from flask import url_for
 from random import choices
+from re import fullmatch
+
 import validators
+from flask import url_for
+
+from settings import (CHARACTERS_SET, CUSTOM_ID_LEN, ITERATIONS_COUNT,
+                      ORIGINAL_LEN, PATTERN, SHORT_LEN)
 
 from . import db
-from settings import (ORIGINAL_LEN,
-                      SHORT_LEN,
-                      CHARACTERS_SET,
-                      CUSTOM_ID_LEN,
-                      ITERATIONS_COUNT,
-                      PATTERN
-                      )
 
 ID_NOT_FOUND = 'Указанный id не найден'
 MISSING_REQUEST = 'Отсутствует тело запроса'
