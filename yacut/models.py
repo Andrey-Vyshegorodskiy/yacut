@@ -7,7 +7,6 @@ from flask import url_for
 
 from settings import (CHARACTERS_SET, CUSTOM_ID_LEN, ITERATIONS_COUNT,
                       ORIGINAL_LEN, PATTERN, SHORT_LEN)
-
 from . import db
 
 ID_NOT_FOUND = 'Указанный id не найден'
