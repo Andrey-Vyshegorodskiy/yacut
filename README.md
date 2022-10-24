@@ -61,7 +61,6 @@ pip install -r requirements.txt
 flask db upgrade
 ```
 
-
 Запуск проекта:
 ```commandline
 flask run
