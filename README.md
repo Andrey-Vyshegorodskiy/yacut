@@ -62,6 +62,7 @@ flask db upgrade
 ```
 
 Запуск проекта:
+
 ```commandline
 flask run
 ```
