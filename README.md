@@ -45,6 +45,7 @@ python3 -m venv venv
     source venv/scripts/activate
     ```
 
+
 Установить зависимости из файла requirements.txt:
 
 ```commandline
